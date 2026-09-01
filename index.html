@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pflegeprozess &amp; ABEDL — Trainer</title>
+<style>
+:root{
+  --paper:#F6F7F4;
+  --card:#FFFFFF;
+  --ink:#1E2A26;
+  --muted:#5F6E68;
+  --line:#D6DDD8;
+  --petrol:#12554E;
+  --petrol-soft:#E4EFEC;
+  --ok:#1C7A52;
+  --ok-soft:#E2F1E9;
+  --no:#A63A2A;
+  --no-soft:#F7E7E3;
+  --gold:#8E6512;
+  --radius:10px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;
+  line-height:1.5;
+  padding:0 18px calc(28px + env(safe-area-inset-bottom));
+}
+.wrap{max-width:620px;margin:0 auto}
+h1,h2,h3{font-family:Georgia,"Iowan Old Style",serif;font-weight:600;letter-spacing:-.01em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--petrol);outline-offset:2px}
+
+/* ---------- Kopf ---------- */
+header{padding:26px 0 18px}
+.kicker{font-size:13px;color:var(--muted)}
+h1{font-size:29px;line-height:1.15;margin:4px 0 6px}
+header p{margin:0;color:var(--muted);font-size:15px}
+
+/* ---------- Startseite ---------- */
+.ring{display:block;margin:14px auto 22px;width:100%;max-width:330px;height:auto}
+.ring text{font-family:system-ui,sans-serif;font-size:9.2px;fill:var(--ink)}
+.ring circle{fill:var(--card);stroke:var(--petrol);stroke-width:1.1}
+.ring path{stroke:var(--petrol);stroke-width:1.1;fill:none;opacity:.55}
+
+.menu{border-top:1px solid var(--line)}
+.menu button{
+  display:flex;align-items:baseline;gap:12px;width:100%;
+  background:none;border:0;border-bottom:1px solid var(--line);
+  padding:15px 2px;text-align:left;
+}
+.menu button:hover .mt{color:var(--petrol)}
+.mt{font-weight:600;flex:1}
+.mn{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mdesc{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
+
+/* ---------- Übungsansicht ---------- */
+.bar{display:flex;align-items:center;gap:12px;padding:14px 0 10px}
+.bar .back{background:none;border:0;padding:6px 8px 6px 0;color:var(--muted);font-size:15px}
+.progress{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--petrol);transition:width .3s}
+.count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.qcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 16px;margin-bottom:14px}
+.qtype{font-size:13px;color:var(--petrol);margin-bottom:8px}
+.qtext{font-family:Georgia,serif;font-size:20px;line-height:1.35}
+.qsub{font-size:14px;color:var(--muted);margin-top:8px}
+
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:13px 14px;text-align:left;width:100%;line-height:1.35;
+  transition:border-color .12s, background .12s;
+}
+.opt:hover:not(:disabled){border-color:var(--petrol)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--no-soft);border-color:var(--no)}
+.opt.dim{opacity:.5}
+.opt.chosen{font-weight:600}
+
+.feedback{margin-top:14px;border-left:3px solid var(--line);padding:2px 0 2px 12px}
+.feedback.right{border-color:var(--ok)}
+.feedback.wrong{border-color:var(--no)}
+.fhead{font-weight:600;margin-bottom:3px}
+.fhead.right{color:var(--ok)}
+.fhead.wrong{color:var(--no)}
+.feedback p{margin:0;font-size:15px;color:var(--muted)}
+
+.next{
+  display:block;width:100%;margin-top:16px;background:var(--petrol);color:#fff;
+  border:0;border-radius:var(--radius);padding:14px;font-weight:600;
+}
+.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+
+/* ---------- Reihenfolge ---------- */
+.slots{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.slot{display:flex;gap:10px;align-items:center;border:1px dashed var(--line);border-radius:var(--radius);padding:11px 12px;font-size:15px;color:var(--muted);min-height:46px}
+.slot.filled{border-style:solid;border-color:var(--petrol);background:var(--petrol-soft);color:var(--ink)}
+.slot.filled.bad{border-color:var(--no);background:var(--no-soft)}
+.snum{font-variant-numeric:tabular-nums;font-size:13px;color:var(--petrol);width:16px;flex:none}
+
+/* ---------- Karteikarten ---------- */
+.flash{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 18px;min-height:190px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.flash h3{font-size:22px;line-height:1.3}
+.flash ul{text-align:left;margin:14px 0 0;padding-left:20px;color:var(--muted);font-size:15px}
+.flash ul li{margin-bottom:4px}
+.row2{display:flex;gap:10px;margin-top:14px}
+.row2 button{flex:1}
+
+/* ---------- Ergebnis ---------- */
+.score{font-family:Georgia,serif;font-size:46px;line-height:1;margin:8px 0 4px}
+.result p{color:var(--muted)}
+
+/* ---------- Umfrage ---------- */
+.survey{background:var(--petrol-soft);border:1px solid var(--petrol);border-radius:var(--radius);padding:18px 16px}
+.survey h2{font-size:21px;margin-bottom:6px}
+.survey p{font-size:15px;color:var(--muted);margin:0 0 14px}
+.qlabel{font-weight:600;font-size:15px;margin:14px 0 7px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:15px}
+.chip.on{background:var(--petrol);border-color:var(--petrol);color:#fff}
+.survey input[type=text]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);font:inherit;margin-top:6px}
+.skip{display:block;width:100%;margin-top:9px;background:none;border:0;color:var(--muted);font-size:14px;padding:8px}
+.codebox{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px;font-size:14px;word-break:break-word;margin:12px 0}
+footer{color:var(--muted);font-size:13px;padding:26px 0 6px;border-top:1px solid var(--line);margin-top:30px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* =======================================================================
+   INHALTE — hier änderst du Fragen, ohne den Rest anfassen zu müssen.
+   ======================================================================= */
+
+const ABEDL = [
+  {n:"Sich pflegen können", k:["Hautpflege","Ganzkörper- und Teilkörperpflege","Hautzustand, Hautschäden"]},
+  {n:"Ausscheiden können", k:["Urin, Stuhl","Obstipation, Diarrhoe","kontinent / inkontinent, Toilettentraining"]},
+  {n:"Essen und trinken können", k:["essen, trinken, kauen, schlucken","Kostformen, Verträglichkeit","Anreichen, Zubereitung, Zahnstatus"]},
+  {n:"Für eine sichere und fördernde Umgebung sorgen können", k:["Stolperfallen, Brandquellen","individuelles Sicherheitsbedürfnis","Orientierungshilfen: Kalender, Uhr, Zeitung"]},
+  {n:"Sich bewegen können", k:["Sensorik und Motorik","Gehen, Lagerung, Gleichgewicht","im und außerhalb des Bettes"]},
+  {n:"Sich kleiden können", k:["an- und auskleiden","Kleidung auswählen, richtige Reihenfolge","Verschmutzung erkennen, bevorzugte Kleidung"]},
+  {n:"Soziale Bereiche des Lebens sichern und gestalten können", k:["persönliche Bezugspersonen: Partner, Kinder, Freunde","pflegerische Bezugspersonen","gesellschaftliches Leben, belastende Beziehungen"]},
+  {n:"Vitale Funktionen des Lebens aufrechterhalten können", k:["Atmen, Herztätigkeit, Kreislauf","Wärmehaushalt, Flüssigkeitsbilanz","Vitalzeichen, Infekte, Fieber"]},
+  {n:"Ruhen und schlafen können", k:["Ruhebedarf, Ruhepausen tagsüber","Tag- und Nachtrhythmus","Schlafgewohnheiten, Schlafstörungen"]},
+  {n:"Sich beschäftigen, lernen und entwickeln können", k:["Tagesgestaltung","Aktivitäten mit anderen Personen","Erinnerungsarbeit, Hobbys"]},
+  {n:"Kommunizieren können", k:["verbal und nonverbal mitteilen","Gestik, Mimik, Sprache, Schreiben","Sehen und Hören, auch mit Hilfsmitteln"]},
+  {n:"Sich als Mann oder Frau fühlen und verhalten können", k:["Rolle als Frau oder Mann","sexuelle Bedürfnisse","Geschlechtlichkeit als Ganzes"]},
+  {n:"Mit existenziellen Erfahrungen des Lebens umgehen können", k:["Freude, Zuversicht, Hoffnung","Sorge, Angst, Trennung, Isolation","Tod, Sterben, Glaube, Lebensgeschichte"]}
+];
+
+// Zuordnung: Satz -> ABEDL (Index) -> optionale Erklärung
+const ZUORDNUNG = [
+  {t:"Frau Adler legt großen Wert darauf, dass ihre Fingernägel gepflegt aussehen.", a:0},
+  {t:"Herr Keller wechselt seine Inkontinenzeinlage jeden Tag selbstständig.", a:1},
+  {t:"Frau Nolte braucht seit ihrem Schlaganfall ein Spezialbesteck, um allein essen zu können.", a:2},
+  {t:"Frau Berger erkennt ihr Zimmer trotz Demenz an der farbig gestalteten Tür.", a:3, e:"Orientierungshilfen gehören zur sicheren und fördernden Umgebung."},
+  {t:"Herr Peters geht wegen seiner Parkinsonerkrankung am Rollator.", a:4},
+  {t:"Herr Roth erscheint zum Lesekreis immer mit korrekt gebundener Krawatte.", a:5},
+  {t:"Herr Braun möchte am liebsten immer von derselben Pflegekraft versorgt werden.", a:6, e:"Gemeint sind hier die pflegerischen Bezugspersonen — das steht ausdrücklich bei den sozialen Bereichen."},
+  {t:"Frau Brandt zieht auch bei Hitze eine Weste an, weil sie schnell friert.", a:7, e:"Frieren zielt auf den Wärmehaushalt. Beim Kleiden geht es dagegen um Auswahl, Reihenfolge und Vorlieben."},
+  {t:"Frau Richter schläft nach dem Kurzurlaub im eigenen Bett wieder besser.", a:8},
+  {t:"Frau Pohl sucht im Internet nach Themen, die sie interessieren.", a:9},
+  {t:"Frau Sander versteht auch mit Hörgerät nur wenig von dem, was gesagt wird.", a:10, e:"Hören gehört zum Kommunizieren, auch mit Hilfsmitteln. Nicht zu den vitalen Funktionen."},
+  {t:"Herr und Frau Simon sitzen gerne händchenhaltend im Wohnbereich.", a:11, e:"Zärtlichkeit und Partnerschaft laufen unter Geschlechtlichkeit als Ganzes."},
+  {t:"Herr Lang hat sich nach dem Tod seiner Frau zurückgezogen, findet aber Halt in seinem Glauben.", a:12}
+];
+
+// Ressource oder Pflegeproblem?
+const RESSOURCEN = [
+  {t:"Die Tochter von Frau Simon besucht sie jede Woche.", r:true, e:"Angehörige sind eine soziale Ressource von außen."},
+  {t:"Die Körperpflege wird vollständig von der Pflegekraft übernommen.", r:false, e:"Was komplett abgenommen wird, ist ein Pflegeproblem, keine Ressource."},
+  {t:"Frau Simon kann sicher an der Bettkante sitzen.", r:true},
+  {t:"Frau Simon läuft mit dem Rollator selbstständig.", r:true, e:"Ein Hilfsmittel hebt die Ressource nicht auf. Entscheidend ist: sie läuft selbstständig."},
+  {t:"Frau Simon bekommt das Essen angereicht.", r:false},
+  {t:"Frau Simon misst ihren Blutzucker, errechnet die Insulineinheiten und spritzt selbst.", r:true, e:"Sehr deutliche Ressource — trotz Erkrankung handelt sie eigenständig."},
+  {t:"Frau Simon hat ihre Parkinsonerkrankung angenommen.", r:true, e:"Einstellungen zählen laut Definition ausdrücklich zu den Ressourcen."},
+  {t:"Herr Wagner hat aufgrund der Arthrose beim Aufstehen starke Schmerzen.", r:false},
+  {t:"Herr Wagner geht gerne täglich spazieren.", r:true},
+  {t:"Herr Wagner benutzt einen Gehstock.", r:true},
+  {t:"Herr Wagner hat ein erhöhtes Sturzrisiko.", r:false},
+  {t:"Herr Wagner ist mobil.", r:true},
+  {t:"Herr Wagner hat eine trockene, schuppige Haut.", r:false},
+  {t:"Herr Wagner ist gesprächsbereit.", r:true, e:"Gesprächsbereitschaft ist die Grundlage für Beratung und Anleitung — eine Ressource."},
+  {t:"Herr Wagner leidet an starkem Juckreiz.", r:false}
+];
+
+// Zieltyp bestimmen
+const ZIELTYP = [
+  {t:"Gewichtszunahme von 10 kg", a:"Fernziel", e:"Das höchstmögliche Ziel, erreicht über mehrere Nahziele."},
+  {t:"Gewichtserhaltung", a:"Nahziel", e:"Kurzfristig erreichbar, erster Schritt Richtung Fernziel."},
+  {t:"Gewichtszunahme von 4 kg innerhalb von 5 Wochen", a:"Nahziel"},
+  {t:"BMI von 20–25 halten (Mann)", a:"Fortlaufendes Ziel", e:"Eine zeitliche Begrenzung wäre hier sinnlos."},
+  {t:"Dekubitus bei Bettlägerigkeit vermeiden", a:"Fortlaufendes Ziel"},
+  {t:"Kontrakturen bei Bettlägerigkeit vermeiden", a:"Fortlaufendes Ziel"},
+  {t:"Herr Wagner hat zwei Wochen nach Aufnahme im Heim eine intakte Haut.", a:"Nahziel", e:"Konkreter Termin, kurzer Zeitraum."}
+];
+
+// Ziel gut oder schlecht formuliert?
+const ZIELQUALITAET = [
+  {t:"Herr Wagner fühlt sich wohler.", ok:false, e:"Nicht überprüfbar. Woran würde man das messen?"},
+  {t:"Herr Wagner hat zwei Wochen nach Aufnahme im Heim eine intakte Haut.", ok:true, e:"Konkreter Termin, überprüfbarer Zustand."},
+  {t:"Herr Wagner berichtet, dass der Schmerz nach Medikamentengabe und Wärmeanwendung erträglich ist.", ok:true, e:"Überprüfbar über die Aussage des Bewohners selbst."},
+  {t:"Frau Nolte läuft drei Tage nach dem Schlaganfall wieder ohne Hilfe Treppen.", ok:false, e:"Nicht realistisch, also nicht erreichbar."},
+  {t:"Herr Wagner stürzt während seines Heimaufenthaltes nicht.", ok:true},
+  {t:"Die Pflegekraft cremt Herrn Wagner täglich ein.", ok:false, e:"Das ist eine Maßnahme, kein Ziel. Ziele beschreiben, was der Pflegebedürftige erreicht."}
+];
+
+// Maßnahme -> welches Ziel?
+const ZIELE3 = [
+  "Herr Wagner hat in zwei Wochen eine intakte Haut.",
+  "Herr Wagner berichtet, dass der Schmerz erträglich ist.",
+  "Herr Wagner stürzt während seines Heimaufenthaltes nicht."
+];
+const MASSNAHMEN = [
+  {t:"Mit pH-neutraler Waschemulsion waschen, sparsam einsetzen", z:0},
+  {t:"Keine Seife verwenden", z:0},
+  {t:"Nach dem Duschen rückfettende Körperlotion verwenden", z:0},
+  {t:"Einmal wöchentlich ein Ölbad nehmen", z:0},
+  {t:"Nächtliches Kratzen durch Baumwollhandschuhe vermeiden", z:0},
+  {t:"Fingernägel kurz halten und rund schneiden", z:0},
+  {t:"Bei starkem Juckreiz anleiten, sanft zu reiben statt zu kratzen", z:0},
+  {t:"Duschen und Baden auf 3x wöchentlich reduzieren, kurz und nicht zu heiß", z:0},
+  {t:"Ausreichend trinken, 1,5–2 Liter am Tag", z:0},
+  {t:"Medikamente nach Arztanordnung verabreichen", z:1},
+  {t:"Wärme nach Bedarf anwenden: warme Bäder, Kirschkernkissen, warme Kleidung", z:1},
+  {t:"Gelenke 2x wöchentlich unter Anleitung des Krankengymnasten bewegen, ohne zu belasten", z:1},
+  {t:"Zu täglichen Spaziergängen ermuntern", z:1},
+  {t:"Gehhilfen zur Fortbewegung anbieten, z. B. Gehstock oder Rollator", z:2},
+  {t:"Haltegriffe im Bad anbringen", z:2},
+  {t:"Sitzmöbel mit Armlehnen anbieten", z:2}
+];
+
+const SCHRITTE = [
+  "Informationen sammeln (Pflegeanamnese)",
+  "Pflegeprobleme und Ressourcen erfassen",
+  "Pflegeziele festlegen",
+  "Pflegemaßnahmen planen",
+  "Pflegemaßnahmen durchführen",
+  "Pflegemaßnahmen auswerten und der Pflegeplanung anpassen"
+];
+
+// Wissensfragen
+const WISSEN = [
+  {q:"Wofür steht die Abkürzung ABEDL?", o:[
+    "Aktivitäten, Beziehungen und existentielle Erfahrungen des Lebens",
+    "Allgemeine Bedürfnisse und existentielle Erfahrungen des Lebens",
+    "Aktivitäten des Lebens und Beziehungen zur Lebenswelt",
+    "Aktivitäten, Bedürfnisse und Erfahrungen der Lebensführung"], a:0},
+  {q:"Wer hat das Pflegemodell der ABEDL entwickelt?", o:[
+    "Monika Krohwinkel","Liliane Juchli","Nancy Roper","Virginia Henderson"], a:0,
+    e:"Deutsche Pflegeforscherin, entwickelt in den 80er Jahren des 20. Jahrhunderts."},
+  {q:"Auf wessen Modellen baut Krohwinkel auf?", o:[
+    "Roper, Juchli und Henderson","Maslow und Erikson","Orem und Peplau","Böhm und Feil"], a:0,
+    e:"Roper: 12 Lebensaktivitäten. Juchli: 12 Aktivitäten des täglichen Lebens. Henderson: 14 Grundbedürfnisse."},
+  {q:"Wie heißt Krohwinkels Modell mit vollem Namen?", o:[
+    "Modell der ganzheitlich-fördernden Prozesspflege",
+    "Modell der aktivierenden Grundpflege",
+    "Modell der ressourcenorientierten Bezugspflege",
+    "Modell der ganzheitlichen Lebensaktivitäten"], a:0},
+  {q:"Wie viele ABEDL unterscheidet Krohwinkel?", o:["13","12","14","10"], a:0},
+  {q:"Was stellt Krohwinkel in den Mittelpunkt der Betrachtung?", o:[
+    "die Fähigkeiten und Möglichkeiten (Ressourcen)",
+    "die Probleme und Defizite",
+    "die ärztliche Diagnose",
+    "den Pflegeaufwand in Minuten"], a:0,
+    e:"Ausdrücklich im Gegensatz zu Problemen und Defiziten."},
+  {q:"Welcher Begriff wird ebenfalls mit Krohwinkels Namen verbunden?", o:[
+    "aktivierende Pflege","validierende Pflege","kompensatorische Pflege","palliative Pflege"], a:0},
+  {q:"Was ist ein Pflegeproblem laut Definition?", o:[
+    "eine Beeinträchtigung der Selbstständigkeit in den ABEDL",
+    "jede ärztliche Diagnose des Bewohners",
+    "eine Beschwerde der Angehörigen über die Pflege",
+    "eine Aufgabe, die im Team noch nicht verteilt wurde"], a:0,
+    e:"Hier wird festgestellt, was der Pflegebedürftige nicht kann."},
+  {q:"Wie sollen Pflegeprobleme formuliert werden?", o:[
+    "kurz, genau und objektiv, mit Ursache",
+    "ausführlich und mit persönlicher Einschätzung",
+    "möglichst allgemein, damit sie lange gültig bleiben",
+    "in medizinischer Fachsprache, damit der Arzt sie versteht"], a:0},
+  {q:"Was sind Ressourcen?", o:[
+    "individuelle Kräfte, Einstellungen, Kenntnisse und Fähigkeiten, auf die zurückgegriffen werden kann",
+    "die finanziellen Mittel der Einrichtung",
+    "die zur Verfügung stehenden Pflegekräfte pro Schicht",
+    "alle Hilfsmittel, die die Krankenkasse bezahlt"], a:0,
+    e:"Sie gleichen Defizite aus und dienen der Problembewältigung."},
+  {q:"Wozu dient die Ressourcenorientierung in erster Linie?", o:[
+    "der Erhaltung und Förderung von Selbstständigkeit und Wohlbefinden",
+    "der Einsparung von Personalkosten",
+    "der schnelleren Dokumentation",
+    "der besseren Abrechnung mit der Pflegekasse"], a:0,
+    e:"Der Pflegebedürftige soll selbst tun, was er noch leisten kann — das beugt Abhängigkeit vor und steigert das Selbstwertgefühl."},
+  {q:"Wann werden Pflegeziele festgelegt?", o:[
+    "gemeinsam mit dem Pflegebedürftigen, für jedes Pflegeproblem",
+    "vom Arzt, bevor der Bewohner einzieht",
+    "einmal jährlich für die gesamte Einrichtung",
+    "erst nachdem die Maßnahmen durchgeführt wurden"], a:0},
+  {q:"Wie sollen Pflegeziele formuliert sein?", o:[
+    "realistisch, also erreichbar und überprüfbar",
+    "möglichst hoch gesteckt, damit motiviert wird",
+    "allgemein, damit sie für mehrere Bewohner passen",
+    "ohne Termin, damit kein Druck entsteht"], a:0,
+    e:"Konkrete Termine gehören dazu: bis wann soll das Ziel erreicht sein?"},
+  {q:"Was sind Pflegemaßnahmen?", o:[
+    "pflegerische Handlungen, mit denen die Pflegeziele erreicht werden sollen",
+    "die Wünsche der Angehörigen an die Pflege",
+    "die im Heimvertrag vereinbarten Leistungen",
+    "die vom Arzt verordneten Medikamente"], a:0,
+    e:"Es handelt sich um Arbeitsanweisungen, an die sich alle Pflegepersonen halten müssen."},
+  {q:"Nach welchen W-Fragen werden Pflegemaßnahmen formuliert?", o:[
+    "Wer macht wann, wo, was, wie, womit?",
+    "Wer, warum und wie oft?",
+    "Was kostet es, wer zahlt und wie lange?",
+    "Wer entscheidet, wer haftet und wer dokumentiert?"], a:0},
+  {q:"Welche Maßnahmen sind bei der Durchführung besonders zu berücksichtigen?", o:[
+    "aktivierende und rehabilitative Maßnahmen",
+    "möglichst zeitsparende Maßnahmen",
+    "Maßnahmen, die ohne Rücksprache umsetzbar sind",
+    "ausschließlich ärztlich verordnete Maßnahmen"], a:0,
+    e:"Sie müssen außerdem zur sozialen Integration des Pflegebedürftigen beitragen."},
+  {q:"Wie heißt der sechste Schritt des Pflegeprozesses mit Fachbegriff?", o:[
+    "Evaluation","Anamnese","Diagnose","Intervention"], a:0,
+    e:"Überprüfung der Pflegeergebnisse und Anpassung der Planung."},
+  {q:"Das Pflegeziel wurde erreicht. Was passiert als Nächstes?", o:[
+    "Ein neues Nahziel wird formuliert.",
+    "Der Pflegeprozess ist abgeschlossen.",
+    "Die Maßnahmen werden ersatzlos gestrichen.",
+    "Der Arzt stellt eine neue Diagnose."], a:0},
+  {q:"Welche Frage gehört NICHT zu den Fragen, wenn ein Pflegeziel nicht erreicht wurde?", o:[
+    "War der Bewohner ausreichend motiviert?",
+    "War das Ziel zu hoch?",
+    "Wurde das Problem richtig erkannt?",
+    "Waren die Pflegemaßnahmen geeignet?"], a:0,
+    e:"Gefragt wird nach neuen Informationen, neuen Problemen, übersehenen Ressourcen, zu hohem Ziel und geeigneten Maßnahmen — nicht nach der Schuld des Bewohners."},
+  {q:"Woher stammen Informationen für die Pflegeanamnese?", o:[
+    "aus Aufnahmegespräch, Angehörigen, Hausarzt, Therapeuten, Seelsorger und eigener Beobachtung",
+    "ausschließlich aus dem Arztbrief des Krankenhauses",
+    "nur aus dem Gespräch mit dem Pflegebedürftigen selbst",
+    "aus der Pflegegradeinstufung des MD"], a:0},
+  {q:"Was gehört zum Aufnahmegespräch mit dem Pflegebedürftigen?", o:[
+    "Biografie, Wünsche, Ängste, Gewohnheiten, Tagesablauf, Medikamente",
+    "nur die aktuelle Medikation",
+    "nur die Kontaktdaten der Angehörigen",
+    "ausschließlich das Messen körperlicher Funktionen"], a:0},
+  {q:"Wodurch haben alle Pflegepersonen denselben Informationsstand?", o:[
+    "durch die Nutzung eines Dokumentationssystems",
+    "durch tägliche Telefonate mit den Angehörigen",
+    "durch die Pflegedienstleitung allein",
+    "durch die Übergabe am Monatsende"], a:0}
+];
+
+const LUECKEN = [
+  {t:"Ein Problem ist eine Beeinträchtigung der ___ des Pflegebedürftigen in den ABEDL.",
+   a:"Selbstständigkeit", o:["Selbstständigkeit","Lebensqualität","Mobilität","Zufriedenheit"]},
+  {t:"Hier wird festgestellt, was der Pflegebedürftige ___ kann.",
+   a:"noch", o:["noch","nicht"], e:"Bei den Ressourcen geht es um das, was noch vorhanden ist. Bei den Problemen um das, was nicht mehr geht."},
+  {t:"Ein ___ wird nach dem Erreichen mehrerer Nahziele als höchstmögliches Ziel erreicht.",
+   a:"Fernziel", o:["Fernziel","Nahziel","fortlaufendes Ziel","Etappenziel"]},
+  {t:"Pflegemaßnahmen sind ___, an die sich alle Pflegepersonen halten müssen.",
+   a:"Arbeitsanweisungen", o:["Arbeitsanweisungen","Empfehlungen","Richtwerte","Vorschläge"]},
+  {t:"Der letzte Schritt des Pflegeprozesses dient der Überprüfung der Pflegeergebnisse, auch ___ genannt.",
+   a:"Evaluation", o:["Evaluation","Anamnese","Visite","Supervision"]},
+  {t:"Ressourcen gleichen Defizite aus und dienen der ___.",
+   a:"Problembewältigung", o:["Problembewältigung","Kostensenkung","Dokumentation","Diagnosestellung"]}
+];
+
+/* =======================================================================
+   THEMEN
+   ======================================================================= */
+const TOPICS = [
+  {id:"mix",     t:"Alles gemischt",            d:"Querschnitt durch den ganzen Stoff",              n:20},
+  {id:"prozess", t:"Der Pflegeprozess",         d:"Die 6 Schritte und was in ihnen passiert",        n:14},
+  {id:"abedl",   t:"Die 13 ABEDL",              d:"Aussagen der richtigen ABEDL zuordnen",           n:16},
+  {id:"ressource",t:"Ressource oder Problem?",  d:"Der Klassiker, bei dem die meisten stolpern",     n:15},
+  {id:"ziele",   t:"Pflegeziele",               d:"Nah-, Fern-, fortlaufend — und gut formuliert?",  n:14},
+  {id:"massnahmen",t:"Maßnahmen zuordnen",      d:"Fallbeispiel Herr Wagner",                        n:12},
+  {id:"karten",  t:"Karteikarten ABEDL",        d:"Die 13 mit ihren Stichworten durchgehen",         n:13}
+];
+
+/* =======================================================================
+   HILFSFUNKTIONEN
+   ======================================================================= */
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function pick(arr,n){return shuffle(arr).slice(0,n);}
+function mc(q,correct,wrongPool,sub,exp,type){
+  const wrong = pick(wrongPool.filter(x=>x!==correct), 3);
+  const opts = shuffle([correct,...wrong]);
+  return {kind:"mc", type:type||"Multiple Choice", q, sub, opts, a:opts.indexOf(correct), e:exp};
+}
+
+/* =======================================================================
+   FRAGEN BAUEN
+   ======================================================================= */
+function buildDeck(id){
+  const names = ABEDL.map(x=>x.n);
+  let d = [];
+
+  const fAbedl = () => pick(ZUORDNUNG, 99).map(z =>
+    mc("Welcher ABEDL ist das?", names[z.a], names, z.t, z.e, "Zuordnen"));
+
+  const fRes = () => pick(RESSOURCEN, 99).map(r => ({
+    kind:"mc", type:"Ressource oder Problem?", q:"Ressource oder Pflegeproblem?", sub:r.t,
+    opts:["Ressource","Pflegeproblem"], a:r.r?0:1,
+    e:r.e || (r.r ? "Etwas, worauf der Pflegebedürftige noch zurückgreifen kann."
+                  : "Eine Beeinträchtigung der Selbstständigkeit — also ein Problem.")
+  }));
+
+  const fZielTyp = () => pick(ZIELTYP,99).map(z => ({
+    kind:"mc", type:"Zieltyp", q:"Um welche Art von Ziel handelt es sich?", sub:z.t,
+    opts:["Nahziel","Fernziel","Fortlaufendes Ziel"], a:["Nahziel","Fernziel","Fortlaufendes Ziel"].indexOf(z.a), e:z.e
+  }));
+
+  const fZielQual = () => pick(ZIELQUALITAET,99).map(z => ({
+    kind:"mc", type:"Ziel prüfen", q:"Ist dieses Pflegeziel brauchbar formuliert?", sub:"„"+z.t+"“",
+    opts:["Ja, erreichbar und überprüfbar","Nein, so nicht"], a:z.ok?0:1,
+    e:z.e || "Pflegeziele sollen realistisch, also erreichbar und überprüfbar sein."
+  }));
+
+  const fMass = () => pick(MASSNAHMEN,99).map(m => ({
+    kind:"mc", type:"Maßnahme → Ziel", q:"Zu welchem Pflegeziel gehört diese Maßnahme?", sub:m.t,
+    opts:ZIELE3.slice(), a:m.z
+  }));
+
+  const fWissen = () => pick(WISSEN,99).map(w => {
+    const correct = w.o[w.a]; const opts = shuffle(w.o);
+    return {kind:"mc", type:"Wissen", q:w.q, opts, a:opts.indexOf(correct), e:w.e};
+  });
+
+  const fLuecke = () => pick(LUECKEN,99).map(l => {
+    const opts = shuffle(l.o);
+    return {kind:"mc", type:"Lückentext", q:l.t, opts, a:opts.indexOf(l.a), e:l.e};
+  });
+
+  const fOrder = () => [{kind:"order", type:"Reihenfolge",
+    q:"Bring die 6 Schritte des Pflegeprozesses in die richtige Reihenfolge.", steps:SCHRITTE.slice()}];
+
+  const fSchritt = () => {
+    const items = [
+      {s:0, t:"Die Tochter berichtet im Erstgespräch von der Mitgliedschaft ihres Vaters im Kirchenchor."},
+      {s:0, t:"Die Pflegekraft erfragt Gewohnheiten, Vorlieben und den gewohnten Tagesablauf."},
+      {s:1, t:"Es wird notiert: unsicherer Gang bei Arthrose, geht aber täglich mit Gehstock spazieren."},
+      {s:2, t:"Gemeinsam wird festgelegt: intakte Haut in zwei Wochen."},
+      {s:3, t:"Im Team wird vereinbart, wer wann womit eincremt, und es wird dokumentiert."},
+      {s:4, t:"Die Pflegekraft cremt nach dem Duschen ein und bezieht den Bewohner aktiv mit ein."},
+      {s:5, t:"Nach zwei Wochen wird geprüft, ob die Haut intakt ist, und die Planung angepasst."},
+      {s:5, t:"Das Ziel wurde erreicht, deshalb wird ein neues Nahziel formuliert."}
+    ];
+    return pick(items,99).map(i =>
+      mc("In welchem Schritt des Pflegeprozesses passiert das?", SCHRITTE[i.s], SCHRITTE, i.t, null, "Pflegeprozess"));
+  };
+
+  if(id==="abedl")       d = fAbedl().concat(pick(fWissen().filter(x=>/ABEDL|Krohwinkel|Modell/.test(x.q)),4));
+  else if(id==="prozess")d = fOrder().concat(fSchritt(), pick(fWissen(),5), pick(fLuecke(),2));
+  else if(id==="ressource") d = fRes();
+  else if(id==="ziele")  d = shuffle(fZielTyp().concat(fZielQual(), pick(fLuecke(),1)));
+  else if(id==="massnahmen") d = fMass();
+  else d = shuffle(fAbedl().slice(0,5).concat(fRes().slice(0,4), fZielTyp().slice(0,2),
+        fZielQual().slice(0,2), fMass().slice(0,2), fWissen().slice(0,4), fLuecke().slice(0,2), fOrder()));
+
+  const cap = (TOPICS.find(t=>t.id===id)||{}).n || 15;
+  return d.slice(0, cap);
+}
+
+/* =======================================================================
+   ZUSTAND
+   ======================================================================= */
+let S = {view:"home", deck:[], i:0, right:0, wrong:[], answered:false, topic:null,
+         order:[], card:0, flipped:false, startedAt:null, surveyDone:false, surveyDue:false,
+         survey:{interesse:null, betrag:null, faecher:[], name:""}};
+
+function usedMinutes(){ return S.startedAt ? (Date.now()-S.startedAt)/60000 : 0; }
+
+/* =======================================================================
+   ANSICHTEN
+   ======================================================================= */
+function ringSVG(){
+  const R=118, cx=150, cy=134, r=40;
+  let s = `<svg class="ring" viewBox="0 0 300 268" role="img" aria-label="Kreislauf des Pflegeprozesses">`;
+  const labels = [["Informationen","sammeln"],["Probleme und","Ressourcen"],["Pflegeziele","festlegen"],
+                  ["Maßnahmen","planen"],["Maßnahmen","durchführen"],["Auswerten und","anpassen"]];
+  for(let i=0;i<6;i++){
+    const a = -Math.PI/2 + i*Math.PI/3;
+    const x = cx + R*Math.cos(a)*0.98, y = cy + R*Math.sin(a)*0.82;
+    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}"/>`;
+    labels[i].forEach((ln,k)=>{
+      s += `<text x="${x.toFixed(1)}" y="${(y-2+k*11).toFixed(1)}" text-anchor="middle">${esc(ln)}</text>`;
+    });
+  }
+  s += `</svg>`;
+  return s;
+}
+
+function viewHome(){
+  app.innerHTML = `
+  <header>
+    <div class="kicker">LG 7 · Pflege organisieren · FOS-G 12.3</div>
+    <h1>Pflegeprozess und ABEDL</h1>
+    <p>Übungstrainer für die Klassenarbeit. Antworten kommen mit Begründung.</p>
+  </header>
+  ${ringSVG()}
+  <div class="menu">
+    ${TOPICS.map(t=>`
+      <button data-topic="${t.id}">
+        <span class="mt">${esc(t.t)}<span class="mdesc">${esc(t.d)}</span></span>
+        <span class="mn">${t.n}</span>
+      </button>`).join("")}
+  </div>
+  <footer>Inhalte nach den Unterlagen aus LG 7. Wer Fehler findet: sagen, dann fliegen sie raus.</footer>`;
+  app.querySelectorAll("[data-topic]").forEach(b=>b.onclick=()=>start(b.dataset.topic));
+}
+
+function start(id){
+  S.topic = id;
+  if(!S.startedAt) S.startedAt = Date.now();
+  if(id==="karten"){ S.view="karten"; S.card=0; S.flipped=false; return render(); }
+  S.deck = buildDeck(id); S.i=0; S.right=0; S.wrong=[]; S.answered=false; S.order=[];
+  S.view="quiz"; render();
+}
+
+function topBar(){
+  const total = S.deck.length || 1;
+  return `<div class="bar">
+    <button class="back" id="back">‹ Übersicht</button>
+    <div class="progress"><i style="width:${Math.round(S.i/total*100)}%"></i></div>
+    <div class="count">${Math.min(S.i+1,total)}/${total}</div>
+  </div>`;
+}
+
+function viewQuiz(){
+  const q = S.deck[S.i];
+  if(!q) return viewResult();
+  if(q.kind==="order") return viewOrder(q);
+
+  app.innerHTML = topBar() + `
+    <div class="qcard">
+      <div class="qtype">${esc(q.type)}</div>
+      <div class="qtext">${esc(q.q)}</div>
+      ${q.sub?`<div class="qsub">${esc(q.sub)}</div>`:""}
+    </div>
+    <div class="opts">
+      ${q.opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join("")}
+    </div>
+    <div id="fb"></div>`;
+  $("#back").onclick = goHome;
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => answer(parseInt(b.dataset.i,10)));
+}
+
+function answer(chosen){
+  if(S.answered) return;
+  S.answered = true;
+  const q = S.deck[S.i];
+  const right = chosen === q.a;
+  if(right) S.right++; else S.wrong.push(q);
+
+  app.querySelectorAll(".opt").forEach((b,i)=>{
+    b.disabled = true;
+    if(i===q.a) b.classList.add("right");
+    else if(i===chosen) b.classList.add("wrong");
+    else b.classList.add("dim");
+    if(i===chosen) b.classList.add("chosen");
+  });
+
+  $("#fb").innerHTML = `
+    <div class="feedback ${right?"right":"wrong"}">
+      <div class="fhead ${right?"right":"wrong"}">${right?"Richtig":"Nicht ganz"}</div>
+      <p>${right?"":"Richtig wäre: "+esc(q.opts[q.a])+". "}${q.e?esc(q.e):""}</p>
+    </div>
+    <button class="next" id="next">Weiter</button>`;
+  $("#next").onclick = next;
+  $("#next").focus();
+}
+
+function next(){
+  S.i++; S.answered=false; S.order=[];
+  if(S.i >= S.deck.length) return viewResult();
+  if(!S.surveyDone && !S.surveyDue && usedMinutes() >= 5){ S.surveyDue = true; S.view="survey"; return render(); }
+  render();
+}
+
+/* ---------- Reihenfolge ---------- */
+function viewOrder(q){
+  const placed = S.order;
+  const done = placed.length === q.steps.length;
+  const rest = q.steps.filter(s => !placed.includes(s));
+  app.innerHTML = topBar() + `
+    <div class="qcard">
+      <div class="qtype">${esc(q.type)}</div>
+      <div class="qtext">${esc(q.q)}</div>
+      <div class="qsub">Tippe die Schritte in der richtigen Reihenfolge an.</div>
+    </div>
+    <div class="slots">
+      ${q.steps.map((_,i)=>{
+        const v = placed[i];
+        const bad = done && v !== SCHRITTE[i];
+        return `<div class="slot ${v?"filled":""} ${bad?"bad":""}">
+          <span class="snum">${i+1}</span><span>${v?esc(v):"…"}</span></div>`;
+      }).join("")}
+    </div>
+    ${done ? "" : `<div class="opts">${rest.map(s=>`<button class="opt" data-s="${esc(s)}">${esc(s)}</button>`).join("")}</div>`}
+    <div id="fb"></div>`;
+  $("#back").onclick = goHome;
+  app.querySelectorAll("[data-s]").forEach(b => b.onclick = () => {
+    S.order.push(b.dataset.s);
+    if(S.order.length === q.steps.length) finishOrder(q);
+    else render();
+  });
+  if(done) finishOrder(q, true);
+}
+
+function finishOrder(q, alreadyDrawn){
+  if(!alreadyDrawn) return render();
+  if(S.answered) return;
+  S.answered = true;
+  const right = S.order.every((s,i)=> s === SCHRITTE[i]);
+  if(right) S.right++; else S.wrong.push(q);
+  $("#fb").innerHTML = `
+    <div class="feedback ${right?"right":"wrong"}">
+      <div class="fhead ${right?"right":"wrong"}">${right?"Alle sechs sitzen":"Da stimmt die Reihenfolge noch nicht"}</div>
+      <p>${right ? "Und weil es ein Kreislauf ist, geht es nach dem Auswerten wieder beim Informationensammeln los."
+                 : "Richtig ist: "+SCHRITTE.map((s,i)=>(i+1)+". "+s).join(" · ")}</p>
+    </div>
+    <button class="next" id="next">Weiter</button>`;
+  $("#next").onclick = next;
+}
+
+/* ---------- Karteikarten ---------- */
+function viewKarten(){
+  const a = ABEDL[S.card];
+  app.innerHTML = `<div class="bar">
+      <button class="back" id="back">‹ Übersicht</button>
+      <div class="progress"><i style="width:${Math.round((S.card+1)/ABEDL.length*100)}%"></i></div>
+      <div class="count">${S.card+1}/${ABEDL.length}</div>
+    </div>
+    <div class="flash">
+      <h3>${esc(a.n)}</h3>
+      ${S.flipped ? `<ul>${a.k.map(k=>`<li>${esc(k)}</li>`).join("")}</ul>` : `<p style="color:var(--muted);font-size:15px;margin:14px 0 0">Was gehört dazu?</p>`}
+    </div>
+    <button class="next" id="flip">${S.flipped?"Stichworte verbergen":"Stichworte zeigen"}</button>
+    <div class="row2">
+      <button class="next ghost" id="prev">Zurück</button>
+      <button class="next ghost" id="fwd">Weiter</button>
+    </div>`;
+  $("#back").onclick = goHome;
+  $("#flip").onclick = ()=>{S.flipped=!S.flipped;render();};
+  $("#prev").onclick = ()=>{S.card=(S.card-1+ABEDL.length)%ABEDL.length;S.flipped=false;render();};
+  $("#fwd").onclick  = ()=>{S.card=(S.card+1)%ABEDL.length;S.flipped=false;render();};
+}
+
+/* ---------- Ergebnis ---------- */
+function viewResult(){
+  const total = S.deck.length;
+  const pct = total ? Math.round(S.right/total*100) : 0;
+  let line;
+  if(pct===100) line = "Vollständig. Da geht nichts mehr drüber.";
+  else if(pct>=80) line = "Das sitzt. Die letzten Lücken siehst du unten.";
+  else if(pct>=60) line = "Solide Basis, aber ein paar Sachen brauchen noch eine Runde.";
+  else line = "Noch wacklig — genau deswegen übst du ja jetzt und nicht erst am Abend vorher.";
+
+  app.innerHTML = `
+    <header><div class="kicker">${esc((TOPICS.find(t=>t.id===S.topic)||{}).t||"")}</div>
+    <div class="score">${S.right}<span style="font-size:24px;color:var(--muted)"> / ${total}</span></div>
+    <p class="result">${esc(line)}</p></header>
+    ${S.wrong.length ? `<button class="next" id="again">${S.wrong.length} falsche noch einmal</button>` : ""}
+    <button class="next ghost" id="repeat" style="margin-top:10px">Neue Runde, gleiches Thema</button>
+    <button class="next ghost" id="home" style="margin-top:10px">Zur Übersicht</button>`;
+  if(S.wrong.length) $("#again").onclick = ()=>{
+    S.deck = shuffle(S.wrong); S.i=0; S.right=0; S.wrong=[]; S.answered=false; S.order=[]; S.view="quiz"; render();
+  };
+  $("#repeat").onclick = ()=>start(S.topic);
+  $("#home").onclick = goHome;
+}
+
+function goHome(){
+  if(!S.surveyDone && (S.surveyDue || usedMinutes() >= 5)){ S.view="survey"; return render(); }
+  S.view="home"; render();
+}
+
+/* ---------- Umfrage ---------- */
+function viewSurvey(){
+  const s = S.survey;
+  const chips = (name, arr, multi) => arr.map(v=>{
+    const on = multi ? s[name].includes(v) : s[name]===v;
+    return `<button class="chip ${on?"on":""}" data-g="${name}" data-v="${esc(v)}">${esc(v)}</button>`;
+  }).join("");
+
+  app.innerHTML = `
+  <div class="survey">
+    <h2>Kurze Frage, dann geht's weiter</h2>
+    <p>Ich überlege, so einen Trainer auch für die anderen Prüfungen zu bauen und aktuell zu halten. Das kostet mich einiges an Zeit — deshalb würde ich gern wissen, ob das für euch etwas wert wäre. Ehrliche Antwort hilft mir mehr als eine nette.</p>
+
+    <div class="qlabel">Würdest du das für andere Fächer nutzen?</div>
+    <div class="chips">${chips("interesse",["Ja, auf jeden Fall","Vielleicht","Eher nicht"])}</div>
+
+    <div class="qlabel">Was wäre es dir pro Prüfung wert?</div>
+    <div class="chips">${chips("betrag",["Nichts","1–2 €","3–5 €","5–10 €","Lieber im Monatsabo"])}</div>
+
+    <div class="qlabel">Für welche Fächer zuerst?</div>
+    <div class="chips">${chips("faecher",["GhuPf","Deutsch","Mathe","Wirtschaft","Bio/Chemie","Englisch"],true)}</div>
+
+    <div class="qlabel">Dein Name (freiwillig)</div>
+    <input type="text" id="nm" value="${esc(s.name)}" placeholder="damit ich weiß, wer geantwortet hat">
+
+    <button class="next" id="send" style="margin-top:18px">Antwort abschicken</button>
+    <button class="skip" id="skip">Überspringen</button>
+  </div>`;
+
+  app.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
+    const g=c.dataset.g, v=c.dataset.v;
+    if(g==="faecher"){
+      const i=s.faecher.indexOf(v); i>=0?s.faecher.splice(i,1):s.faecher.push(v);
+    } else s[g] = (s[g]===v?null:v);
+    s.name = $("#nm").value; render();
+  });
+  $("#send").onclick = ()=>{ s.name = $("#nm").value; sendSurvey(); };
+  $("#skip").onclick = ()=>{ S.surveyDone=true; S.view="home"; render(); };
+}
+
+function sendSurvey(){
+  const s = S.survey;
+  const txt = `Lerntrainer-Umfrage | Interesse: ${s.interesse||"—"} | Betrag: ${s.betrag||"—"} | Fächer: ${s.faecher.join(", ")||"—"} | Von: ${s.name||"anonym"}`;
+  S.surveyDone = true;
+  app.innerHTML = `
+    <div class="survey">
+      <h2>Danke dir</h2>
+      <p>Schick mir die Zeile kurz rüber, dann kann ich es auswerten.</p>
+      <div class="codebox" id="code">${esc(txt)}</div>
+      <button class="next" id="wa">Per WhatsApp schicken</button>
+      <button class="next ghost" id="cp" style="margin-top:10px">Text kopieren</button>
+      <button class="skip" id="on">Weiter üben</button>
+    </div>`;
+  $("#wa").onclick = ()=>{ window.open("https://wa.me/?text="+encodeURIComponent(txt), "_blank"); };
+  $("#cp").onclick = ()=>{
+    navigator.clipboard.writeText(txt).then(
+      ()=>{ $("#cp").textContent="Kopiert"; },
+      ()=>{ $("#cp").textContent="Text oben markieren und kopieren"; });
+  };
+  $("#on").onclick = ()=>{ S.view="home"; render(); };
+}
+
+/* =======================================================================
+   ROUTER
+   ======================================================================= */
+function render(){
+  window.scrollTo(0,0);
+  if(S.view==="home") return viewHome();
+  if(S.view==="quiz") return viewQuiz();
+  if(S.view==="karten") return viewKarten();
+  if(S.view==="survey") return viewSurvey();
+  return viewHome();
+}
+render();
+</script>
+</body>
+</html>
